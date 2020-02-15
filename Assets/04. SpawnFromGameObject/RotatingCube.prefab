@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 2702723199292179637}
   - component: {fileID: 2702723199292179646}
   - component: {fileID: 2702723199292179641}
-  - component: {fileID: 3003579760466442962}
   - component: {fileID: 2702723199292179645}
   m_Layer: 0
   m_Name: RotatingCube
@@ -82,19 +81,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!114 &3003579760466442962
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2702723199292179644}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConversionMode: 0
 --- !u!114 &2702723199292179645
 MonoBehaviour:
   m_ObjectHideFlags: 0
