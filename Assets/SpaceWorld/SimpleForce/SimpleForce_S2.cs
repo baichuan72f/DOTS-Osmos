@@ -1,3 +1,4 @@
+using System.Linq;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -10,56 +11,86 @@ using Unity.Transforms;
 [UpdateBefore (typeof (SimpleForce_S1))]
 public class SimpleForce_S2 : JobComponentSystem {
 
-    EntityQuery entityGroup;
+    EntityQuery forceQuery;
+    EntityCommandBufferSystem bufferSystem;
 
     [BurstCompile]
-    struct moverChangeJob : IJobForEach<Forcer, Mover_C, MassPoint_C> {
+    struct ForceJob : IJobParallelFor {
         public float deltaTime;
-        public void Execute (ref Forcer forcePoint, ref Mover_C mover, ref MassPoint_C mass) {
-            var forces = forcePoint.GetForces();
-            float3 joinForce = float3.zero;
-            // 计算受力对于速度的改变
-            for (int j = 0; j < forces.Length; j++) {
-                // 筛选还在持续的力
-                var force = forces[j];
-                if (force.direction.w <= 0 || force.type == ForceType.Gravity) {
-                    forcePoint.RemoveForce (j);
-                    continue;
-                }
-
-                // 施力时间不足一帧
-                var time = deltaTime;
-                if (deltaTime > force.direction.w) time = force.direction.w;
-                joinForce += new float3 (force.direction.x, force.direction.y, force.direction.z) * time;
-
-                // 施力时间减少
-                force.direction.w -= deltaTime;
-                forces[j] = force;
-                forcePoint.ReplaceForce(j,force);
-            }
-
-            mover = new Mover_C () {
-                direction = mover.direction + joinForce / mass.Mass
-            };
-
+        public NativeArray<Force_C> forces;
+        public NativeArray<Mover_C> movers;
+        public NativeArray<MassPoint_C> masses;
+        public void Execute (int index) {
+            var mass = masses[index];
+            var force = forces[index];
+            var mover = movers[index];
+            mover.direction += force.value * deltaTime / mass.Mass;
+            movers[index] = mover;
         }
     }
     protected override void OnCreate () {
+        bufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem> ();
         EntityQueryDesc queryDescription = new EntityQueryDesc ();
-        queryDescription.All = new [] { ComponentType.ReadWrite<Forcer> (), ComponentType.ReadWrite<Mover_C> (), ComponentType.ReadOnly<MassPoint_C> () };
-        entityGroup = GetEntityQuery (queryDescription);
+        queryDescription.All = new [] { ComponentType.ReadWrite<Force_C> () };
+        forceQuery = GetEntityQuery (queryDescription);
     }
 
     protected override JobHandle OnUpdate (JobHandle inputDeps) {
+
         // 计算准备
         float deltaTime = Time.DeltaTime;
+        var forcers = forceQuery.ToEntityArray (Allocator.Persistent);
 
-        // 准备句柄
-        moverChangeJob bufferJob = new moverChangeJob ();
-        bufferJob.deltaTime = Time.DeltaTime;
-        JobHandle mover_handle = bufferJob.Schedule (entityGroup, inputDeps);
+        var forcerEnumerable = forcers.ToList ()
+            .Where<Entity> ((v) => {
+                var force = EntityManager.GetComponentData<Force_C> (v);
+                bool hasTo = !force.to.Equals (Entity.Null);
+                bool hasFrom = !force.from.Equals (Entity.Null);
+                bool hasMover = EntityManager.HasComponent<Mover_C> (force.to);
+                bool hasMass = EntityManager.HasComponent<MassPoint_C> (force.to);
+                return hasTo && hasFrom && hasMover && hasMass;
+            });
+        if (forcerEnumerable.Count () == 0) {
+            return inputDeps;
+        }
+        NativeArray<Force_C> forceArr = new NativeArray<Force_C> (
+            forcerEnumerable.Select<Entity, Force_C> ((v) => {
+                return EntityManager.GetComponentData<Force_C> (v);
+            }).ToArray (), Allocator.Persistent);
+        UnityEngine.Debug.Log (forceArr.Length);
+        NativeArray<Entity> toArr = new NativeArray<Entity> (
+            forceArr.Select<Force_C, Entity> ((v) => {
+                return v.to;
+            }).ToArray (), Allocator.Persistent);
+        NativeArray<Mover_C> movers = new NativeArray<Mover_C> (
+            forceArr.Select<Force_C, Mover_C> ((v) => {
+                return EntityManager.GetComponentData<Mover_C> (v.to);
+            }).ToArray (), Allocator.Persistent);
+        NativeArray<MassPoint_C> masses = new NativeArray<MassPoint_C> (
+            forceArr.Select<Force_C, MassPoint_C> ((v) => {
+                return EntityManager.GetComponentData<MassPoint_C> (v.to);
+            }).ToArray (), Allocator.Persistent);
+        // 计算受力
+        var forceJob = new ForceJob ();
+        forceJob.deltaTime = deltaTime;
+        forceJob.masses = masses;
+        forceJob.movers = movers;
+        forceJob.forces = forceArr;
+        inputDeps = forceJob.Schedule (forceArr.Length, 64, inputDeps);
 
+        inputDeps.Complete ();
+        for (int i = 0; i < toArr.Length; i++) {
+            // UnityEngine.Debug.Log(movers[i].direction);
+            EntityManager.SetComponentData (toArr[i], movers[i]);
+        }
+        forceArr.Dispose (inputDeps);
+        EntityManager.DestroyEntity (forcers);
+        forcers.Dispose (inputDeps);
+
+        movers.Dispose (inputDeps);
+        toArr.Dispose (inputDeps);
+        masses.Dispose (inputDeps);
         //返回句柄
-        return mover_handle;
+        return inputDeps;
     }
 }

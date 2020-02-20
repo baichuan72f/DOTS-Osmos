@@ -14,8 +14,6 @@ public class mousePoition_Authoring : MonoBehaviour {
     void Update () {
         if (Input.GetMouseButtonDown (0)) {
             Vector3 pos = Camera.main.ScreenToWorldPoint (Input.mousePosition + Vector3.forward * 10);
-            Debug.Log (pos);
-            //new GameObject ().transform.position = pos;
             var mousePos = new Mouseposition_C ();
             mousePos.value = pos;
             mousePos.index = index;

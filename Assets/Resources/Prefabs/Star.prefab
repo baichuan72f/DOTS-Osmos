@@ -102,11 +102,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8879937561937840109}
-  - component: {fileID: 6468688031921234747}
-  - component: {fileID: 6468688031921234746}
   - component: {fileID: 8879937561937840104}
   - component: {fileID: 8879937561937840106}
-  - component: {fileID: 6468688031921234751}
+  - component: {fileID: 4170051369772095220}
   m_Layer: 0
   m_Name: Star
   m_TagString: Untagged
@@ -121,47 +119,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8879937561937840113}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_Children:
   - {fileID: 6468688032100582665}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6468688031921234747
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8879937561937840113}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a031dd626d01714f94538eaa37332d1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  direction:
-    x: 0
-    y: 0
-    z: 0
---- !u!114 &6468688031921234746
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8879937561937840113}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9e820e89f10ca6b45be190128bfcdd98, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  direction_default:
-    x: 0
-    y: 0
-    z: 0
-    w: 0
 --- !u!114 &8879937561937840104
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -175,6 +140,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Mass: 100
+  densityType: 1000
 --- !u!114 &8879937561937840106
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -191,7 +157,7 @@ MonoBehaviour:
     x: 0
     y: 0
     z: 0
---- !u!114 &6468688031921234751
+--- !u!114 &4170051369772095220
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -200,7 +166,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8879937561937840113}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
+  m_Script: {fileID: 11500000, guid: 007cd1c9c3d2eb74894eb2ad2d411877, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ConversionMode: 0
+  volume: 1
