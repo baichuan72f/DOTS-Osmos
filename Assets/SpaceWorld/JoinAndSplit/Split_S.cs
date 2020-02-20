@@ -30,13 +30,16 @@ public class Split_S : JobComponentSystem {
             MassPoint_C subMass = new MassPoint_C () { Mass = density.water.Volume2Mass (subJoiner.volume) };
             Mover_C subMover = new Mover_C ();
             Translation subTranslation = new Translation ();
+            NonUniformScale subScale=new NonUniformScale();
             var dirNormal = math.normalize (spliter.direction);
             var distance = UnitHelper.Volume2Range (spliter.volume) + UnitHelper.Volume2Range (joiner.volume);
             subTranslation.Value = translation.Value + dirNormal * distance;
+            subScale.Value=0.01f;
             concurrent.AddComponent (index, subEntity, subTranslation);
             concurrent.AddComponent (index, subEntity, subJoiner);
             concurrent.AddComponent (index, subEntity, subMass);
             concurrent.AddComponent (index, subEntity, subMover);
+            concurrent.AddComponent(index, subEntity, subScale);
             // 添加子物体受力
             SimapleForceSender_C subForce = new SimapleForceSender_C () {
                 value = math.normalize (spliter.direction) / 20,
