@@ -31,7 +31,7 @@ public class Gravity_S : JobComponentSystem {
                 if (float.IsNaN (dir.x) || float.IsNaN (dir.y) || float.IsNaN (dir.z)) continue;
                 float distance = math.distance (sendertranslations[j].Value, translation.Value);
                 if (distance < 1) distance = 1;
-                float power = mass.Mass * gravtiySenders[j].GravityMass * G * (math.pow (1 / distance, 1));
+                float power = mass.Mass * gravtiySenders[j].GravityMass * G * (1f / distance);
                 // 添加受力情况
                 Force_C force = new Force_C ();
                 force.value = power * dir;
@@ -57,17 +57,6 @@ public class Gravity_S : JobComponentSystem {
     protected override JobHandle OnUpdate (JobHandle inputDeps) {
         // 准备句柄
         AddGravityHandle bufferJob = new AddGravityHandle ();
-
-        //接受者
-        //var recevierArr = ReceiverGroup.ToEntityArray (Allocator.Persistent);
-        //NativeArray<MassPoint_C> masses = new NativeArray<MassPoint_C> (recevierArr.Length, Allocator.Persistent);
-        //NativeArray<Translation> translations = new NativeArray<Translation> (recevierArr.Length, Allocator.Persistent);
-        //
-        //for (int i = 0; i < recevierArr.Length; i++) {
-        //    masses[i] = EntityManager.GetComponentData<MassPoint_C> (recevierArr[i]);
-        //    translations[i] = EntityManager.GetComponentData<Translation> (recevierArr[i]);
-        //
-        //}
 
         //发送者
         var senderArr = SenderGroup.ToEntityArray (Allocator.Persistent);
@@ -96,8 +85,8 @@ public class Gravity_S : JobComponentSystem {
         //释放计算任务所需
         senderArr.Dispose (inputDeps);
         //recevierArr.Dispose (inputDeps);
-        bufferJob.gravtiySenders.Dispose ();
-        bufferJob.sendertranslations.Dispose ();
+        senders.Dispose ();
+        Sendertranslations.Dispose ();
         //bufferJob.masses.Dispose ();
         //bufferJob.receiverTranslations.Dispose ();
 

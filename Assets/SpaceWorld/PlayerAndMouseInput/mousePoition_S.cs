@@ -6,34 +6,8 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 public class mousePoition_S : JobComponentSystem {
+    public float splitVolume = 1f;
     EntityCommandBufferSystem bufferSystem;
-    // [BurstCompile]
-    // struct MouseMoveJob : IJobParallelFor {
-    //     public EntityCommandBuffer.Concurrent concurrent;
-    //     [ReadOnly] public NativeArray<Entity> outEntitites;
-    //     [ReadOnly] public NativeArray<player_C> players;
-    //     [ReadOnly] public NativeArray<Translation> translations;
-    //     [ReadOnly] public NativeArray<Mouseposition_C> mousepositions;
-
-    //     public void Execute (int index) {
-    //         var mouseposition = mousepositions[index];
-    //         for (int j = 0; j < players.Length; j++) {
-    //             //筛选实体
-    //             var player = players[j];
-    //             if (player.Index != mouseposition.index) continue;
-    //             var translation = translations[j];
-
-    //             // 添加受力情况
-    //             var entity = concurrent.CreateEntity (index);
-    //             var force = new SimapleForceSender_C ();
-    //             force.type = ForceType.external;
-    //             force.time = 2;
-    //             force.value = math.normalizesafe (translation.Value - mouseposition.value);
-    //             force.to = outEntitites[index];
-    //             concurrent.AddComponent (index, entity, force);
-    //         }
-    //     }
-    // }
     EntityQuery inEntitites;
     EntityQuery outEntitites;
     protected override void OnCreate () {
@@ -69,7 +43,7 @@ public class mousePoition_S : JobComponentSystem {
                 }
                 Spliter_C spliter = new Spliter_C ();
                 spliter.direction = direction;
-                spliter.volume = 0.2f;
+                spliter.volume = splitVolume;
                 EntityManager.AddComponentData<Spliter_C> (entity, spliter);
             }
         }

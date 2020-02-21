@@ -6,7 +6,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-[UpdateBefore (typeof (Momantum_S))]
+[UpdateBefore (typeof (Momentum_S))]
 public class Join_S : JobComponentSystem {
     public EntityCommandBufferSystem bufferSystem;
 
@@ -44,13 +44,21 @@ public class Join_S : JobComponentSystem {
                     //物质转移量
                     float v = isOut?(-joiner.volume * outScale): (joiner2.volume * outScale);
                     outVolume += v;
+                    float mass = UnitHelper.Volume2Mass (density.water, v);
                     if (!isOut) {
-                        Momentum_C momentum = new Momentum_C ();
-                        momentum.mass = v;
-                        momentum.mover = mover;
-                        momentum.speed = movers[i].direction;
-                        momentum.target = entity;
-                        concurrent.AddComponent (index, concurrent.CreateEntity (index), momentum);
+                        Momentum_C momentumIn = new Momentum_C ();
+                        momentumIn.mass = mass;
+                        momentumIn.mover = mover;
+                        momentumIn.speed = movers[i].direction;
+                        momentumIn.target = entity;
+                        concurrent.AddComponent (index, concurrent.CreateEntity (index), momentumIn);
+                        Momentum_C momentumOut = new Momentum_C ();
+                        momentumOut.mass = mass;
+                        momentumOut.speed = -movers[i].direction;
+                        momentumOut.target = entities[i];
+                        momentumOut.mover = movers[i];
+                        concurrent.AddComponent (index, concurrent.CreateEntity (index), momentumOut);
+
                     }
                 }
             }
@@ -62,6 +70,7 @@ public class Join_S : JobComponentSystem {
                 scale.Value = new float3 (1, 1, 1) * 2 * UnitHelper.Volume2Range (joiner.volume);
                 concurrent.SetComponent (index, entity, scale);
                 concurrent.SetComponent (index, entity, joiner);
+
             }
         }
     }

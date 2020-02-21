@@ -6,20 +6,24 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 //物体按照速度移动
-[UpdateInGroup(typeof(TransformSystemGroup))]
+[UpdateInGroup (typeof (TransformSystemGroup))]
 public class SimpleForce_S1 : JobComponentSystem {
-
+    bool3 fixation = new bool3 (false, false, true);
     protected override JobHandle OnUpdate (JobHandle inputDeps) {
         //计算准备
         float deltaTime = Time.DeltaTime;
-
+        var fixXYZ = this.fixation;
         //准备句柄
         var handle = Entities
             //筛选
             .WithName ("SimpleForce1System")
             .ForEach ((ref Translation translation, in Mover_C mover) => {
                 translation.Value += deltaTime * mover.direction;
-                translation.Value.z = 0;
+                var tran = translation.Value;
+                if (fixXYZ.x) tran.x = 0;
+                if (fixXYZ.y) tran.y = 0;
+                if (fixXYZ.z) tran.z = 0;
+                translation.Value = tran;
             }).Schedule (inputDeps);
         //返回句柄
         return handle;

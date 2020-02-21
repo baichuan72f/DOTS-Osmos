@@ -24,7 +24,7 @@ public static class UnitHelper {
     // Mass单位;暂定kg
     static float MassUnit = 1f;
     // Range单位;暂定m
-    static float RangeUnit = 1;
+    static float RangeUnit = 5;
     // 体积换算成质量
     public static float Volume2Mass (this density density, float volume) {
         return volume * ((int) density * 0.001f) / MassUnit;

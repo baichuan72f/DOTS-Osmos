@@ -25,8 +25,15 @@ public class AddJoinView_S : JobComponentSystem {
             if (!EntityManager.HasComponent<NonUniformScale> (item)) {
                 EntityManager.AddComponent<NonUniformScale> (item);
             }
+            if (!EntityManager.HasComponent<MassPoint_C> (item)) {
+                EntityManager.AddComponent<MassPoint_C> (item);
+            }
+            MassPoint_C mass = new MassPoint_C ();
+            var joiner = EntityManager.GetComponentData<Joiner_C> (item);
+            mass.Mass = UnitHelper.Volume2Mass (density.water, joiner.volume);
+            EntityManager.SetComponentData<MassPoint_C> (item, mass);
         }
-        entities.Dispose(inputDeps);
+        entities.Dispose (inputDeps);
         return inputDeps;
     }
 }

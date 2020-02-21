@@ -57,7 +57,7 @@ public class SimpleForce_S2 : JobComponentSystem {
             forcerEnumerable.Select<Entity, Force_C> ((v) => {
                 return EntityManager.GetComponentData<Force_C> (v);
             }).ToArray (), Allocator.Persistent);
-        UnityEngine.Debug.Log (forceArr.Length);
+//        UnityEngine.Debug.Log (forceArr.Length);
         NativeArray<Entity> toArr = new NativeArray<Entity> (
             forceArr.Select<Force_C, Entity> ((v) => {
                 return v.to;
