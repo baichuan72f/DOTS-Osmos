@@ -48,7 +48,7 @@ public class Join_S : JobComponentSystem {
                     if (!isOut) {
                         Momentum_C momentumIn = new Momentum_C ();
                         momentumIn.mass = mass;
-                        momentumIn.mover = mover;
+                        //momentumIn.mover = mover;
                         momentumIn.speed = movers[i].direction;
                         momentumIn.target = entity;
                         concurrent.AddComponent (index, concurrent.CreateEntity (index), momentumIn);
@@ -56,7 +56,7 @@ public class Join_S : JobComponentSystem {
                         momentumOut.mass = mass;
                         momentumOut.speed = -movers[i].direction;
                         momentumOut.target = entities[i];
-                        momentumOut.mover = movers[i];
+                        //momentumOut.mover = movers[i];
                         concurrent.AddComponent (index, concurrent.CreateEntity (index), momentumOut);
 
                     }
@@ -70,7 +70,6 @@ public class Join_S : JobComponentSystem {
                 scale.Value = new float3 (1, 1, 1) * 2 * UnitHelper.Volume2Range (joiner.volume);
                 concurrent.SetComponent (index, entity, scale);
                 concurrent.SetComponent (index, entity, joiner);
-
             }
         }
     }

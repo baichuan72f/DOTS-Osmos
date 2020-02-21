@@ -8,7 +8,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 //动量守恒系统
-
+[UpdateAfter(typeof(AddJoinView_S))]
 public class Momentum_S : JobComponentSystem {
     public EntityCommandBufferSystem bufferSystem;
 
@@ -55,7 +55,7 @@ public class Momentum_S : JobComponentSystem {
             Momentum_C momentum = EntityManager.GetComponentData<Momentum_C> (fromArr[i]);
             MomentumArr[i] = momentum;
             toArr[i] = momentum.target;
-            movers[i] = momentum.mover;
+            movers[i] = EntityManager.GetComponentData<Mover_C> (momentum.target);
             masses[i] = EntityManager.GetComponentData<MassPoint_C> (momentum.target);
         }
         //实例句柄

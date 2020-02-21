@@ -56,7 +56,7 @@ public class Split_S : JobComponentSystem {
             //添加子物体动量
             Momentum_C subMomentum = new Momentum_C () {
                 mass = subMass.Mass,
-                mover = subMover,
+                //mover = subMover,
                 speed = spliterForce * 4,
                 target = subEntity
             };
@@ -65,7 +65,7 @@ public class Split_S : JobComponentSystem {
             // 添加主物体动量
             Momentum_C momentum = new Momentum_C () {
                 mass = subMass.Mass,
-                mover = mover,
+                //mover = mover,
                 speed = -spliterForce * 4,
                 target = entity
             };
