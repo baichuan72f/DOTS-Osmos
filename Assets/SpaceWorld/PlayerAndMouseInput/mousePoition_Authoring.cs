@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class mousePoition_Authoring : MonoBehaviour {
     EntityManager manager;
-    public int index;
+    public int index = 1;
     // Start is called before the first frame update
     void Start () {
         manager = World.DefaultGameObjectInjectionWorld.EntityManager;

@@ -16,7 +16,7 @@ public class SimpleForce_S2 : JobComponentSystem {
 
     [BurstCompile]
     struct ForceJob : IJobParallelFor {
-        public float deltaTime;
+        public double deltaTime;
         public NativeArray<Force_C> forces;
         public NativeArray<Mover_C> movers;
         public NativeArray<MassPoint_C> masses;
@@ -38,7 +38,7 @@ public class SimpleForce_S2 : JobComponentSystem {
     protected override JobHandle OnUpdate (JobHandle inputDeps) {
 
         // 计算准备
-        float deltaTime = Time.DeltaTime;
+        double deltaTime = Time.DeltaTime;
         var forcers = forceQuery.ToEntityArray (Allocator.Persistent);
 
         var forcerEnumerable = forcers.ToList ()

@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6040886710030762741}
   - component: {fileID: 6040886710030762738}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: Mirror
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -59,7 +59,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 85ddb007093de49408dc836843f07e7d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

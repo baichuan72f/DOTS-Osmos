@@ -24,16 +24,17 @@ public class ViewManager : MonoBehaviour {
         var prefabNames = new string[] { "Star", "Mirror" };
         setting = GameObjectConversionSettings.FromWorld (World.DefaultGameObjectInjectionWorld, null);
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
+
         //初始化配置
         InitConfig (manager, setting, prefabNames);
         //初始化场景
-        ChunckConfig chunckConfig = fastChunkConfig (new float3 (-6, 6, 0), Vector3.right);
+        ChunckConfig chunckConfig = fastChunkConfig (new float3 (-11, 11, 0), Vector3.right);
         InitScene (manager, chunckConfig);
-        chunckConfig = fastChunkConfig (new float3 (6, 6, 0), Vector3.down);
+        chunckConfig = fastChunkConfig (new float3 (11, 11, 0), Vector3.down);
         InitScene (manager, chunckConfig);
-        chunckConfig = fastChunkConfig (new float3 (6, -6, 0), Vector3.left);
+        chunckConfig = fastChunkConfig (new float3 (11, -11, 0), Vector3.left);
         InitScene (manager, chunckConfig);
-        chunckConfig = fastChunkConfig (new float3 (-6, -6, 0), Vector3.up);
+        chunckConfig = fastChunkConfig (new float3 (-11, -11, 0), Vector3.up);
         InitScene (manager, chunckConfig);
     }
 
@@ -43,11 +44,11 @@ public class ViewManager : MonoBehaviour {
         ChunckConfig chunckConfig = new ChunckConfig ();
         chunckConfig.entity = entity;
         chunckConfig.center = position;
-        chunckConfig.count = 100;
-        chunckConfig.maxSpeed = direction * 0.9f;
-        chunckConfig.minSpeed = direction * 0.7f;
-        chunckConfig.size = new float3 (5, 5, 0);
-        chunckConfig.volumeRange = new RangeInt (2, 4);
+        chunckConfig.count = 50;
+        chunckConfig.maxSpeed = direction * 0.6f;
+        chunckConfig.minSpeed = direction * 0.4f;
+        chunckConfig.size = new float3 (10, 10, 0);
+        chunckConfig.volumeRange = new RangeInt (8, 20);
         return chunckConfig;
     }
 
@@ -74,6 +75,18 @@ public class ViewManager : MonoBehaviour {
             manager.SetComponentData (entity, joiner);
             manager.SetComponentData (entity, mover);
             manager.SetComponentData (entity, translation);
+        }
+    }
+
+    private void Update () {
+        if (Input.GetKeyDown (KeyCode.Escape)) {
+            Application.Quit ();
+            return;
+        }
+        if (Input.GetKeyDown (KeyCode.Space)) {
+            EntityManager.
+            UnityEngine.SceneManagement.SceneManager.LoadScene (0);
+            return;
         }
     }
     void OnDestroy () {

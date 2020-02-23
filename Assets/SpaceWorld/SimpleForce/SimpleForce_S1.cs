@@ -18,7 +18,7 @@ public class SimpleForce_S1 : JobComponentSystem {
             //筛选
             .WithName ("SimpleForce1System")
             .ForEach ((ref Translation translation, in Mover_C mover) => {
-                translation.Value += deltaTime * mover.direction;
+                translation.Value += (float3)(deltaTime * mover.direction);
                 var tran = translation.Value;
                 if (fixXYZ.x) tran.x = 0;
                 if (fixXYZ.y) tran.y = 0;

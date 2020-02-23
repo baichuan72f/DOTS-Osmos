@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/SpaceWorld/Star.unity
+    guid: ef1cd748b3677b743a297e9123b0e504
   m_configObjects: {}

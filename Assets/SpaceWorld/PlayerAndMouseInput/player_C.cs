@@ -4,5 +4,5 @@ using Unity.Mathematics;
 [GenerateAuthoringComponent]
 public struct player_C : IComponentData
 {
-    public int Index;
+    public int index;
 }

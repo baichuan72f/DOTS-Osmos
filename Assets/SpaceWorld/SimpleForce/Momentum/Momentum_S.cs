@@ -8,7 +8,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 //动量守恒系统
-[UpdateAfter(typeof(AddJoinView_S))]
+[UpdateAfter(typeof(AddJoinNeed_S))]
 public class Momentum_S : JobComponentSystem {
     public EntityCommandBufferSystem bufferSystem;
 
@@ -22,7 +22,7 @@ public class Momentum_S : JobComponentSystem {
 
         public void Execute (int index) {
             var momentum = MomentumArr[index];
-            float3 speed = movers[index].direction * masses[index].Mass + momentum.mass * momentum.speed;
+            double3 speed = movers[index].direction * masses[index].Mass + momentum.mass * momentum.speed;
             Mover_C mover = new Mover_C () { direction = speed / (masses[index].Mass + momentum.mass) };
             concurrent.SetComponent (index, toArr[index], mover);
         }

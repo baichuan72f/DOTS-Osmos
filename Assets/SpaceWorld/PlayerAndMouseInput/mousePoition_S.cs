@@ -35,7 +35,7 @@ public class mousePoition_S : JobComponentSystem {
             for (int j = 0; j < outArr.Length; j++) {
                 Entity entity = outArr[j];
                 var player = EntityManager.GetComponentData<player_C> (entity);
-                if (player.Index != mouseposition.index) continue;
+                if (player.index != mouseposition.index) continue;
                 var translation = EntityManager.GetComponentData<Translation> (entity);
                 var direction = math.normalize (mouseposition.value - translation.Value);
                 if (math.isnan (direction).x || math.isnan (direction).y || math.isnan (direction).z) {

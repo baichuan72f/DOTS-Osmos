@@ -5,6 +5,6 @@ using Unity.Mathematics;
 [GenerateAuthoringComponent]
 public struct Mover_C : IComponentData {
     //速度的方向和大小
-    public float3 direction;
+    public double3 direction;
 
 }

@@ -17,7 +17,7 @@ public class Split_S : JobComponentSystem {
                 return;
             }
             //校验spliter数据合理性
-            if (spliter.direction.Equals (float3.zero)) {
+            if (spliter.direction.Equals (double3.zero)) {
                 return;
             }
             bool3 nanResult = math.isnan (math.normalize (spliter.direction));
@@ -33,7 +33,7 @@ public class Split_S : JobComponentSystem {
             NonUniformScale subScale = new NonUniformScale ();
             var dirNormal = math.normalize (spliter.direction);
             var distance = UnitHelper.Volume2Range (spliter.volume) + UnitHelper.Volume2Range (joiner.volume);
-            subTranslation.Value = translation.Value + dirNormal * distance;
+            subTranslation.Value = translation.Value + (float3)(dirNormal * distance);
             subScale.Value = 0.01f;
             concurrent.AddComponent (index, subEntity, subTranslation);
             concurrent.AddComponent (index, subEntity, subJoiner);

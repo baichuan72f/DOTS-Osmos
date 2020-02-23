@@ -15,7 +15,7 @@ public class Gravity_S : JobComponentSystem {
     [BurstCompile]
     struct AddGravityHandle : IJobForEachWithEntity<MassPoint_C, Translation> {
 
-        [ReadOnly] public float G;
+        [ReadOnly] public double G;
         public EntityCommandBuffer.Concurrent concurrent;
         [ReadOnly] public NativeArray<Entity> fromEntities;
 
@@ -27,16 +27,16 @@ public class Gravity_S : JobComponentSystem {
             for (int j = 0; j < gravtiySenders.Length; j++) {
                 var same = sendertranslations[j].Value == translation.Value;
                 if (same.x && same.y && same.z) continue;
-                float3 dir = math.normalizesafe (sendertranslations[j].Value - translation.Value);
-                if (float.IsNaN (dir.x) || float.IsNaN (dir.y) || float.IsNaN (dir.z)) continue;
-                float distance = math.distance (sendertranslations[j].Value, translation.Value);
+                double3 dir = math.normalize (sendertranslations[j].Value - translation.Value);
+                if (double.IsNaN (dir.x) || double.IsNaN (dir.y) || double.IsNaN (dir.z)) continue;
+                double distance = math.distance (sendertranslations[j].Value, translation.Value);
                 if (distance < 1) distance = 1;
-                float power = mass.Mass * gravtiySenders[j].GravityMass * G * (1f / distance);
+                double power = mass.Mass * gravtiySenders[j].GravityMass * G * (1f / distance);
                 // 添加受力情况
                 Force_C force = new Force_C ();
                 force.value = power * dir;
                 force.type = ForceType.Gravity;
-                force.time = float.MaxValue;
+                force.time = double.MaxValue;
                 force.from = fromEntities[j];
                 force.to = entity;
                 concurrent.AddComponent (index, concurrent.CreateEntity (index), force);

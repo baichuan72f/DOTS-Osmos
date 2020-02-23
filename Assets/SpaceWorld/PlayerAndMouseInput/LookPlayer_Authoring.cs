@@ -15,7 +15,7 @@ public class LookPlayer_Authoring : MonoBehaviour {
     private void Update () {
         NativeArray<Entity> entities = entityQuery.ToEntityArray (Allocator.Persistent);
         for (int i = 0; i < entities.Length; i++) {
-            if (manager.GetComponentData<player_C> (entities[i]).Index == index) {
+            if (manager.GetComponentData<player_C> (entities[i]).index == index) {
                 var position = manager.GetComponentData<Translation> (entities[i]).Value;
                 Author.transform.position = position;
             }

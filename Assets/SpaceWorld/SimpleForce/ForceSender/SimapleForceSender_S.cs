@@ -10,9 +10,9 @@ public class SimapleForceSender_S : JobComponentSystem {
     EntityCommandBufferSystem bufferSystem;
     struct senderJob : IJobForEachWithEntity<SimapleForceSender_C> {
         public EntityCommandBuffer.Concurrent concurrent;
-        public float deltime;
+        public double deltime;
         public void Execute (Entity entity, int index, ref SimapleForceSender_C sender) {
-            float t = deltime;
+            double t = deltime;
             if (sender.time < t) t = sender.time;
             sender.time -= t;
 

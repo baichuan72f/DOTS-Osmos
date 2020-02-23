@@ -9,7 +9,7 @@ using Unity.Transforms;
 [UpdateBefore (typeof (Momentum_S))]
 public class Join_S : JobComponentSystem {
     public EntityCommandBufferSystem bufferSystem;
-
+    [BurstCompile]
     struct JoinJob : IJobParallelFor {
         public EntityCommandBuffer.Concurrent concurrent;
         [ReadOnly] public NativeArray<Entity> entities;
@@ -25,9 +25,9 @@ public class Join_S : JobComponentSystem {
             Mover_C mover = movers[index];
             NonUniformScale scale = scales[index];
             //计算与当前星体接触的星体
-            float outScale = 0.1f;
-            float outVolume = 0;
-            float3 addV = float3.zero;
+            double outScale = 0.15f;
+            double outVolume = 0;
+            double3 addV = double3.zero;
             for (int i = 0; i < joiners.Length; i++) {
                 if (i == index) continue;
                 var joiner2 = joiners[i];
@@ -42,9 +42,9 @@ public class Join_S : JobComponentSystem {
                 if (range1 + range2 > dis) {
                     bool isOut = joiner2.volume > joiner.volume;
                     //物质转移量
-                    float v = isOut?(-joiner.volume * outScale): (joiner2.volume * outScale);
+                    double v = isOut?(-joiner.volume * outScale): (joiner2.volume * outScale);
                     outVolume += v;
-                    float mass = UnitHelper.Volume2Mass (density.water, v);
+                    double mass = UnitHelper.Volume2Mass (density.water, v);
                     if (!isOut) {
                         Momentum_C momentumIn = new Momentum_C ();
                         momentumIn.mass = mass;
@@ -54,7 +54,7 @@ public class Join_S : JobComponentSystem {
                         concurrent.AddComponent (index, concurrent.CreateEntity (index), momentumIn);
                         Momentum_C momentumOut = new Momentum_C ();
                         momentumOut.mass = mass;
-                        momentumOut.speed = -movers[i].direction;
+                        momentumOut.speed = -movers[i].direction*0.15f;
                         momentumOut.target = entities[i];
                         //momentumOut.mover = movers[i];
                         concurrent.AddComponent (index, concurrent.CreateEntity (index), momentumOut);
@@ -67,7 +67,7 @@ public class Join_S : JobComponentSystem {
             if (joiner.volume < 0.01f) {
                 concurrent.DestroyEntity (index, entity);
             } else {
-                scale.Value = new float3 (1, 1, 1) * 2 * UnitHelper.Volume2Range (joiner.volume);
+                scale.Value = (float3)(new double3 (1, 1, 1) * 2 * UnitHelper.Volume2Range (joiner.volume));
                 concurrent.SetComponent (index, entity, scale);
                 concurrent.SetComponent (index, entity, joiner);
             }
