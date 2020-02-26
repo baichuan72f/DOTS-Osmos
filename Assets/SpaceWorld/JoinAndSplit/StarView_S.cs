@@ -8,7 +8,7 @@ using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
 
-[UpdateAfter (typeof (Join_S))]
+[UpdateAfter (typeof (Momentum_S))]
 public class StarView_S : JobComponentSystem {
     EntityCommandBufferSystem bufferSystem;
     EntityQuery playerQuery;
@@ -46,22 +46,23 @@ public class StarView_S : JobComponentSystem {
         inputDeps.Complete ();
         var joiners = joinerQuery.ToEntityArray (Allocator.TempJob);
         Joiner_C playerJoiner;
-        players.TryGetValue (1, out playerJoiner); // 暂时取1，默认玩家索引为1
+       var canGet= players.TryGetValue (1, out playerJoiner); // 暂时取1，默认玩家索引为1
+       if (!canGet)playerJoiner=new Joiner_C(){Range=0.01};
         if (materials == null) materials = new Dictionary<double, Material> ();
         if (renders == null) renders = new Dictionary<double, RenderMesh> ();
 
         //显示View
         for (int i = 0; i < joiners.Length; i++) {
             Joiner_C joiner = EntityManager.GetComponentData<Joiner_C> (joiners[i]);
-            var danger = math.round ((10 * joiner.volume / playerJoiner.volume)) * 0.05;
+            var danger = ((int)(joiner.Volume*20 / playerJoiner.Volume)) * 0.025;
+            danger=math.clamp(danger,0,1);
             if (!materials.ContainsKey (danger)) {
                 var render = EntityManager.GetSharedComponentData<RenderMesh> (joiners[i]);
                 materials.Add (danger, GameObject.Instantiate<Material> (render.material));
                 materials[danger].SetFloat ("FreeTime", (float) danger);
                 render.material = materials[danger];
                 renders.Add (danger, render);
-                Debug.Log (danger);
-                
+                //Debug.Log (danger);
             }
             EntityManager.AddSharedComponentData (joiners[i], renders[danger]);
         }

@@ -38,10 +38,9 @@ public class SimapleForceSender_S : JobComponentSystem {
         bufferSystem = World.GetOrCreateSystem<BeginPresentationEntityCommandBufferSystem> ();
     }
     protected override JobHandle OnUpdate (JobHandle inputDeps) {
-        var deltime = Time.DeltaTime;
         var senderJob = new senderJob ();
         senderJob.concurrent = bufferSystem.CreateCommandBuffer ().ToConcurrent ();
-        senderJob.deltime = Time.DeltaTime;
+        senderJob.deltime =math.min(0.05,Time.DeltaTime);
         inputDeps = senderJob.Schedule (this, inputDeps);
         return inputDeps;
     }

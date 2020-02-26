@@ -5,12 +5,16 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine;
 
-[UpdateBefore (typeof (Momentum_S))]
-public class Join_S : JobComponentSystem {
+[UpdateBefore(typeof(Momentum_S))]
+public class Join_S : JobComponentSystem
+{
     public EntityCommandBufferSystem bufferSystem;
     [BurstCompile]
-    struct JoinJob : IJobParallelFor {
+    struct JoinJob : IJobParallelFor
+    {
+        public double deltaTime;
         public EntityCommandBuffer.Concurrent concurrent;
         [ReadOnly] public NativeArray<Entity> entities;
         public NativeArray<Joiner_C> joiners;
@@ -18,90 +22,106 @@ public class Join_S : JobComponentSystem {
         [ReadOnly] public NativeArray<Mover_C> movers;
         public NativeArray<NonUniformScale> scales;
 
-        public void Execute (int index) {
+        public void Execute(int index)
+        {
             Entity entity = entities[index];
             Joiner_C joiner = joiners[index];
             Translation translation = translations[index];
             Mover_C mover = movers[index];
             NonUniformScale scale = scales[index];
-            //计算与当前星体接触的星体
-            double outScale = 0.15f;
-            double outVolume = 0;
-            double3 addV = double3.zero;
-            for (int i = 0; i < joiners.Length; i++) {
+            // 增加的体积
+            double addVolume = 0;
+            // 增加的质量
+            double addMass = 0;
+            // 增加的动量
+            double3 addMomentum = double3.zero;
+            for (int i = 0; i < joiners.Length; i++)
+            {
                 if (i == index) continue;
                 var joiner2 = joiners[i];
-                if (joiner2.volume == joiner.volume && entity.Index > entities[i].Index) continue;
-
+                if (joiner.Volume <= 0 || joiner2.Volume <= 0) continue;
+                if (joiner2.Range == joiner.Range && entity.Index > entities[i].Index) continue;
                 var translation2 = translations[i];
-                var dis = math.distance (translation.Value, translation2.Value);
+                var dis = math.distance(translation.Value, translation2.Value);
                 if (dis == 0) continue;
-                var range1 = UnitHelper.Volume2Range (joiner.volume);
-                var range2 = UnitHelper.Volume2Range (joiner2.volume);
 
-                if (range1 + range2 > dis) {
-                    bool isOut = joiner2.volume > joiner.volume;
-                    //物质转移量
-                    double v = isOut?(-joiner.volume * outScale): (joiner2.volume * outScale);
-                    outVolume += v;
-                    double mass = UnitHelper.Volume2Mass (density.water, v);
-                    if (!isOut) {
-                        Momentum_C momentumIn = new Momentum_C ();
-                        momentumIn.mass = mass;
-                        //momentumIn.mover = mover;
-                        momentumIn.speed = movers[i].direction;
-                        momentumIn.target = entity;
-                        concurrent.AddComponent (index, concurrent.CreateEntity (index), momentumIn);
-                        Momentum_C momentumOut = new Momentum_C ();
-                        momentumOut.mass = mass;
-                        momentumOut.speed = -movers[i].direction*0.15f;
-                        momentumOut.target = entities[i];
-                        //momentumOut.mover = movers[i];
-                        concurrent.AddComponent (index, concurrent.CreateEntity (index), momentumOut);
-
+                if (joiner.Range + joiner2.Range > dis)
+                {
+                    //如果被吸收则减少当前体积，如果吸收则增加对方的体积
+                    bool isOut = joiner2.Range > joiner.Range;
+                    double v = isOut ? joiner.Volume : joiner2.Volume;
+                    //最少吸收每秒吸收1体积
+                    if (v > 0.2)
+                    {
+                        v = math.max(0.2, v * deltaTime * 2);
                     }
+                    if (!isOut)
+                    {
+                        var m = UnitHelper.Volume2Mass(v);
+                        addMass += m;
+                        addMomentum += m * movers[i].direction;
+                    }
+                    addVolume += isOut ? -v : v;
                 }
             }
-            joiner.volume += outVolume;
+            joiner.Volume += addVolume;
+
             //根据物质量显示物体
-            if (joiner.volume < 0.01f) {
-                concurrent.DestroyEntity (index, entity);
-            } else {
-                scale.Value = (float3)(new double3 (1, 1, 1) * 2 * UnitHelper.Volume2Range (joiner.volume));
-                concurrent.SetComponent (index, entity, scale);
-                concurrent.SetComponent (index, entity, joiner);
+            if (joiner.Volume < 0.01)
+            {
+                concurrent.DestroyEntity(index, entity);
+                return;
             }
+
+            if (addVolume > 0)
+            {
+                //添加动量
+                Momentum_C momentumIn = new Momentum_C();
+                momentumIn.mass = addMass * 0.1;
+                momentumIn.speed = addMomentum / (addMass + 1);
+                momentumIn.target = entity;
+                concurrent.AddComponent(index, concurrent.CreateEntity(index), momentumIn);
+            }
+            scale.Value = (float3)(new double3(1, 1, 1) * 2 * joiner.Range);
+            concurrent.SetComponent(index, entity, scale);
+            concurrent.SetComponent(index, entity, joiner);
         }
     }
     EntityQuery entityQuery;
     EntityQuery viewQuery;
-    protected override void OnCreate () {
-        bufferSystem = World.GetOrCreateSystem<BeginPresentationEntityCommandBufferSystem> ();
-        viewQuery = GetEntityQuery (
-            typeof (Joiner_C),
-            typeof (Translation),
-            typeof (NonUniformScale),
-            typeof (Mover_C)
+    protected override void OnCreate()
+    {
+        bufferSystem = World.GetOrCreateSystem<BeginPresentationEntityCommandBufferSystem>();
+        viewQuery = GetEntityQuery(
+            typeof(Joiner_C),
+            typeof(Translation),
+            typeof(NonUniformScale),
+            typeof(Mover_C)
         );
     }
 
-    protected override JobHandle OnUpdate (JobHandle inputDeps) {
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    {
+        var deltaTime = math.min(0.05, Time.DeltaTime);
         // 计算准备
-        var concurrent = bufferSystem.CreateCommandBuffer ().ToConcurrent ();
-        NativeArray<Entity> entities = viewQuery.ToEntityArray (Allocator.Persistent);
-        NativeArray<Translation> translations = new NativeArray<Translation> (entities.Length, Allocator.Persistent);
-        NativeArray<Joiner_C> joiners = new NativeArray<Joiner_C> (entities.Length, Allocator.Persistent);
-        NativeArray<NonUniformScale> scales = new NativeArray<NonUniformScale> (entities.Length, Allocator.Persistent);
-        NativeArray<Mover_C> movers = new NativeArray<Mover_C> (entities.Length, Allocator.Persistent);
+        var concurrent = bufferSystem.CreateCommandBuffer().ToConcurrent();
+        NativeArray<Entity> entities = viewQuery.ToEntityArray(Allocator.Persistent);
+        NativeArray<Translation> translations = new NativeArray<Translation>(entities.Length, Allocator.Persistent);
+        NativeArray<Joiner_C> joiners = new NativeArray<Joiner_C>(entities.Length, Allocator.Persistent);
+        NativeArray<NonUniformScale> scales = new NativeArray<NonUniformScale>(entities.Length, Allocator.Persistent);
+        NativeArray<Mover_C> movers = new NativeArray<Mover_C>(entities.Length, Allocator.Persistent);
 
-        for (int i = 0; i < entities.Length; i++) {
-            translations[i] = EntityManager.GetComponentData<Translation> (entities[i]);
-            joiners[i] = EntityManager.GetComponentData<Joiner_C> (entities[i]);
-            scales[i] = EntityManager.GetComponentData<NonUniformScale> (entities[i]);
-            movers[i] = EntityManager.GetComponentData<Mover_C> (entities[i]);
+        for (int i = 0; i < entities.Length; i++)
+        {
+
+            translations[i] = EntityManager.GetComponentData<Translation>(entities[i]);
+            joiners[i] = EntityManager.GetComponentData<Joiner_C>(entities[i]);
+            scales[i] = EntityManager.GetComponentData<NonUniformScale>(entities[i]);
+            movers[i] = EntityManager.GetComponentData<Mover_C>(entities[i]);
         }
         // 新建句柄
-        var splitJob = new JoinJob ();
+        var splitJob = new JoinJob();
+        splitJob.deltaTime = deltaTime;
         splitJob.concurrent = concurrent;
         splitJob.entities = entities;
         splitJob.movers = movers;
@@ -109,13 +129,13 @@ public class Join_S : JobComponentSystem {
         splitJob.translations = translations;
         splitJob.scales = scales;
         // 挂载句柄
-        inputDeps = splitJob.Schedule (entities.Length, entities.Length, inputDeps);
-        inputDeps.Complete ();
-        movers.Dispose (inputDeps);
-        entities.Dispose (inputDeps);
-        translations.Dispose (inputDeps);
-        joiners.Dispose (inputDeps);
-        scales.Dispose (inputDeps);
+        inputDeps = splitJob.Schedule(entities.Length, entities.Length, inputDeps);
+        inputDeps.Complete();
+        movers.Dispose(inputDeps);
+        entities.Dispose(inputDeps);
+        translations.Dispose(inputDeps);
+        joiners.Dispose(inputDeps);
+        scales.Dispose(inputDeps);
         return inputDeps;
     }
 }

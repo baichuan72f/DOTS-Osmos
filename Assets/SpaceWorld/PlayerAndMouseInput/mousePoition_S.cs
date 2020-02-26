@@ -5,6 +5,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[UpdateBefore(typeof(Split_S))]
 public class mousePoition_S : JobComponentSystem {
     public float splitVolume = 1f;
     EntityCommandBufferSystem bufferSystem;
